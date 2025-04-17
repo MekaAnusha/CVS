@@ -1,0 +1,132 @@
+openapi: 3.0.0
+info:
+  title: Movie API
+  description: API for retrieving and searching movie data.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/movies
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Get all movies
+      description: Retrieve a paginated list of movies.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Number of movies per page
+      responses:
+        '200':
+          description: A list of movies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovieSummary'
+
+  /search:
+    get:
+      summary: Search movies
+      description: Search for movies by year and/or genre.
+      parameters:
+        - in: query
+          name: year
+          schema:
+            type: integer
+          description: Release year to filter by
+        - in: query
+          name: genre
+          schema:
+            type: string
+          description: Genre to filter by (partial match)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Number of movies per page
+      responses:
+        '200':
+          description: A list of movies matching the criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovieSummary'
+
+  /{id}:
+    get:
+      summary: Get movie details
+      description: Retrieve detailed information about a specific movie by ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The internal movie ID
+      responses:
+        '200':
+          description: Detailed movie information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieDetail'
+        '404':
+          description: Movie not found
+
+components:
+  schemas:
+    MovieSummary:
+      type: object
+      properties:
+        imdbId:
+          type: string
+        title:
+          type: string
+        genres:
+          type: string
+        releaseDate:
+          type: string
+          format: date
+        budget:
+          type: string
+          example: "$25000000"
+
+    MovieDetail:
+      allOf:
+        - $ref: '#/components/schemas/MovieSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            runtime:
+              type: integer
+              example: 142
+            averageRating:
+              type: number
+              format: float
+              example: 9.3
+            language:
+              type: string
+            productionCompanies:
+              type: string
